@@ -11,9 +11,10 @@ namespace SqlSugarTest
     [SugarTable(IsDisabledDelete =true)]
     public class Model
     {
-        [SugarColumn(IsPrimaryKey =true)]
-        public int Id { get; set; }
-        [SugarColumn(OldColumnName = "MyName", ColumnName ="NccName")]
+        [SugarColumn(IsPrimaryKey =true,IsIdentity =true)]
+        public int? Id { get; set; }
+        [SugarColumn(ColumnName ="NccName")]
         public string MyName { get; set; }
+        public DateTime Timt { get; set; }
     }
 }

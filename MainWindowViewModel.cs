@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace SqlSugarTest
 {
@@ -29,27 +30,34 @@ namespace SqlSugarTest
                 IsAutoCloseConnection = true,
                 InitKeyType = InitKeyType.Attribute
             });
-            db.CodeFirst.InitTables<Model>();
-            db.CodeFirst.As<Model>("model233").InitTables<Model>();
+            if (db.DbMaintenance.IsAnyTable("Model"))
+                db.CodeFirst.InitTables<Model>();
+            //db.CodeFirst.As<Model>("model233").InitTables<Model>();
             //GenerateData();
         }
 
         private void GenerateData()
         {
             var cellCollection = File.ReadAllText("TextCellCollection.txt").Split(',');
-            Enumerable.Range(1, 20).ToList().ForEach(i =>
+            Enumerable.Range(0, 20).ToList().ForEach(i =>
             {
-                db.Insertable(new Model() { Id = i, MyName = cellCollection[i] }).ExecuteCommand();
+                db.Insertable(new Model() { MyName = cellCollection[i] }).ExecuteCommand();
             });
         }
         [RelayCommand]
-        private void QueryData()
+        private async Task QueryData()
         {
             ShowData.Clear();
-            var qrs = db.Queryable<Model>().ToList();
-            Enumerable.Range(0, qrs.Count()).ToList().ForEach(i =>
+            await Task.Run(() =>
             {
-                ShowData.Add(qrs[i]);
+                var qrs = db.Queryable<Model>().ToList();
+                Enumerable.Range(0, qrs.Count()).ToList().ForEach(i =>
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        ShowData.Add(qrs[i]);
+                    });
+                });
             });
         }
         [RelayCommand]
@@ -71,7 +79,8 @@ namespace SqlSugarTest
         private void UpdateData()
         {
             if (SelectData == null) return;
-            db.Updateable<Model>().SetColumns(it => new Model() { MyName = IdName }).Where(it => it.Id == SelectData.Id).ExecuteCommand();
+            db.Storageable(new Model() {MyName=SelectData.MyName, Timt = DateTime.Now }).WhereColumns(it=>it.MyName).ExecuteCommand();
+            //db.Updateable<Model>().SetColumns(it => new Model() { Timt = DateTime.Now }).Where(it => it.MyName == SelectData.MyName).ExecuteCommand();
             ShowData.Clear();
             QueryData();
         }

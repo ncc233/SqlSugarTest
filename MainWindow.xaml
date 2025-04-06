@@ -23,6 +23,7 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="ID" Binding="{Binding Id}"/>
                 <DataGridTextColumn Header="Name" Binding="{Binding MyName}"/>
+                <DataGridTextColumn Header="Name" Binding="{Binding Timt}"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
